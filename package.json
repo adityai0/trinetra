@@ -1,0 +1,22 @@
+{
+  "name": "sigterm",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "npm run start --workspace=web",
+    "dev:web": "npm run dev --workspace=web",
+    "build:web": "npm run build --workspace=web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "workspaces": [
+    "app/*",
+    "package/*"
+  ],
+  "dependencies": {
+    "prettier": "^3.8.1"
+  }
+}
