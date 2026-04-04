@@ -18,7 +18,9 @@ export function AlertCard({ alert }: AlertCardProps) {
       <CardContent className="space-y-2 px-0 py-0">
         <div className="flex items-center justify-between text-xs">
           <p className="font-semibold">{alert.personId}</p>
-          <p className="opacity-80">{formatTimestamp(alert.timestamp)}</p>
+          <p className="text-muted-foreground">
+            {formatTimestamp(alert.timestamp)}
+          </p>
         </div>
         <Badge
           variant="outline"
@@ -26,7 +28,7 @@ export function AlertCard({ alert }: AlertCardProps) {
         >
           Risk {(alert.riskScore * 100).toFixed(0)}%
         </Badge>
-        <p className="text-xs leading-relaxed text-slate-200/90">
+        <p className="text-xs leading-relaxed text-foreground">
           {alert.explanation}
         </p>
       </CardContent>

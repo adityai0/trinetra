@@ -37,9 +37,9 @@ export function ZoneControls({
   onSetZoneType,
 }: ZoneControlsProps) {
   return (
-    <Card className="gap-0 rounded-2xl border border-white/10 bg-slate-950/70 py-0">
+    <Card className="gap-0 rounded-2xl py-0">
       <CardHeader className="px-3 py-3">
-        <CardTitle className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Zone Controls
         </CardTitle>
       </CardHeader>
@@ -47,55 +47,45 @@ export function ZoneControls({
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
-            variant="ghost"
+            variant={drawMode === 'rectangle' ? 'default' : 'secondary'}
             size="sm"
             onClick={() => onSetDrawMode('rectangle')}
-            className={`h-7 rounded-lg px-3 py-1.5 text-xs font-semibold ${
-              drawMode === 'rectangle'
-                ? 'bg-cyan-500 text-slate-950'
-                : 'bg-slate-800 text-slate-200'
-            }`}
+            className="h-7 rounded-lg px-3 py-1.5 text-xs font-semibold"
           >
             Rectangle
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant={drawMode === 'polygon' ? 'default' : 'secondary'}
             size="sm"
             onClick={() => onSetDrawMode('polygon')}
-            className={`h-7 rounded-lg px-3 py-1.5 text-xs font-semibold ${
-              drawMode === 'polygon'
-                ? 'bg-cyan-500 text-slate-950'
-                : 'bg-slate-800 text-slate-200'
-            }`}
+            className="h-7 rounded-lg px-3 py-1.5 text-xs font-semibold"
           >
             Polygon
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant={editingEnabled ? 'default' : 'secondary'}
             size="sm"
             onClick={onToggleEdit}
-            className={`h-7 rounded-lg px-3 py-1.5 text-xs font-semibold ${
-              editingEnabled
-                ? 'bg-amber-400 text-slate-950'
-                : 'bg-slate-800 text-slate-200'
-            }`}
+            className="h-7 rounded-lg px-3 py-1.5 text-xs font-semibold"
           >
             Edit
           </Button>
         </div>
 
         <div className="flex items-center gap-2">
-          <Label className="text-xs font-medium text-slate-400">Type</Label>
+          <Label className="text-xs font-medium text-muted-foreground">
+            Type
+          </Label>
           <Select
             value={zoneType}
             onValueChange={(value) => onSetZoneType(value as ZoneType)}
           >
-            <SelectTrigger className="h-8 min-w-36 rounded-md border-white/10 bg-slate-900 px-3 text-xs text-slate-100">
+            <SelectTrigger className="h-8 min-w-36 rounded-md px-3 text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="border-white/10 bg-slate-900 text-slate-100">
+            <SelectContent>
               <SelectItem value="restricted">Restricted</SelectItem>
               <SelectItem value="warning">Warning</SelectItem>
               <SelectItem value="safe">Safe</SelectItem>
@@ -109,7 +99,7 @@ export function ZoneControls({
             variant="secondary"
             size="sm"
             onClick={onUndo}
-            className="h-7 bg-slate-800 text-xs text-slate-100 hover:bg-slate-700"
+            className="h-7 text-xs"
           >
             Undo
           </Button>
@@ -118,7 +108,7 @@ export function ZoneControls({
             variant="secondary"
             size="sm"
             onClick={onCancel}
-            className="h-7 bg-slate-800 text-xs text-slate-100 hover:bg-slate-700"
+            className="h-7 text-xs"
           >
             Cancel
           </Button>

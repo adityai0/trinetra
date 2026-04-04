@@ -5,12 +5,12 @@ import type { ZoneType } from '@/types';
  */
 export function zoneTypeColor(type: ZoneType): string {
   if (type === 'restricted') {
-    return '#f43f5e';
+    return 'hsl(var(--destructive))';
   }
 
   if (type === 'warning') {
-    return '#f59e0b';
+    return 'hsl(var(--accent-foreground))';
   }
 
-  return '#22c55e';
+  return 'hsl(var(--primary))';
 }

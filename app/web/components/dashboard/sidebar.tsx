@@ -22,7 +22,7 @@ const sections: { id: DashboardSection; label: string }[] = [
  */
 export function Sidebar({ active, onChange }: SidebarProps) {
   return (
-    <aside className="flex w-24 shrink-0 flex-col gap-2 border-r border-white/10 bg-slate-950/80 p-3 backdrop-blur">
+    <aside className="flex w-24 shrink-0 flex-col gap-2 border-r p-3">
       {sections.map((section) => {
         const selected = section.id === active;
 
@@ -34,10 +34,10 @@ export function Sidebar({ active, onChange }: SidebarProps) {
             size="sm"
             onClick={() => onChange(section.id)}
             className={cn(
-              'h-auto justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold tracking-wide transition',
+              'h-auto justify-start rounded-xl px-3 py-2 text-left text-xs font-semibold tracking-wide',
               selected
-                ? 'bg-cyan-500/20 text-cyan-200 hover:bg-cyan-500/30 hover:text-cyan-100'
-                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                : 'text-muted-foreground'
             )}
           >
             {section.label}

@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   description: 'AI-powered theft prevention surveillance interface',
 };
 
+/**
+ * Provides application-level document structure and global providers.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

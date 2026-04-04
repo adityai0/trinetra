@@ -23,15 +23,10 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
   const toasts = ordered.slice(0, 3);
 
   return (
-    <Card className="relative h-full gap-0 rounded-2xl border border-white/10 bg-slate-950/70 py-0">
+    <Card className="relative h-full gap-0 rounded-2xl py-0">
       <CardHeader className="flex flex-row items-center justify-between px-4 py-4">
-        <CardTitle className="text-sm font-semibold text-slate-100">
-          Live Alerts
-        </CardTitle>
-        <Badge
-          variant="outline"
-          className="border-white/15 bg-transparent text-xs text-slate-400"
-        >
+        <CardTitle className="text-sm font-semibold">Live Alerts</CardTitle>
+        <Badge variant="outline" className="text-xs text-muted-foreground">
           {ordered.length} tracked
         </Badge>
       </CardHeader>
@@ -40,7 +35,7 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
         <ScrollArea className="h-full pr-1">
           <div className="space-y-3">
             {ordered.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-white/15 p-4 text-xs text-slate-400">
+              <p className="rounded-lg border border-dashed p-4 text-xs text-muted-foreground">
                 No active alerts.
               </p>
             ) : (
@@ -66,12 +61,12 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
             initial={{ y: -12, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -8, opacity: 0 }}
-            className="rounded-2xl border border-cyan-400/30 bg-slate-900/90 p-3 shadow-lg"
+            className="rounded-2xl border bg-card p-3 text-card-foreground"
           >
-            <p className="text-xs font-semibold text-cyan-100">
+            <p className="text-xs font-semibold">
               New incident · {toast.personId}
             </p>
-            <p className="mt-1 text-xs text-slate-300">{toast.explanation}</p>
+            <p className="text-xs text-muted-foreground">{toast.explanation}</p>
           </motion.div>
         ))}
       </div>

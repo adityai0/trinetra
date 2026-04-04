@@ -34,12 +34,12 @@ export function riskToneClass(score: number): string {
   const label = riskLabel(score);
 
   if (label === 'high') {
-    return 'text-rose-300 border-rose-500/60 bg-rose-500/10';
+    return 'border-destructive/50 bg-destructive/10 text-destructive';
   }
 
   if (label === 'medium') {
-    return 'text-amber-200 border-amber-500/60 bg-amber-500/10';
+    return 'border-accent bg-accent text-accent-foreground';
   }
 
-  return 'text-emerald-200 border-emerald-500/60 bg-emerald-500/10';
+  return 'border-primary/40 bg-primary/10 text-primary';
 }

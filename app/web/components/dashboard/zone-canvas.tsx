@@ -193,9 +193,9 @@ export function ZoneCanvas({
   };
 
   return (
-    <Card className="gap-0 rounded-2xl border border-white/10 bg-slate-950/70 py-0">
+    <Card className="gap-0 rounded-2xl py-0">
       <CardHeader className="flex flex-row items-center justify-between px-3 py-3">
-        <CardTitle className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Zone Canvas
         </CardTitle>
         {selectedZone ? (
@@ -204,7 +204,7 @@ export function ZoneCanvas({
             variant="destructive"
             size="xs"
             onClick={() => onDeleteZone(selectedZone.id)}
-            className="h-6 rounded-md bg-rose-500/20 px-2 py-1 text-xs font-medium text-rose-200 hover:bg-rose-500/30"
+            className="h-6 rounded-md px-2 py-1 text-xs font-medium"
           >
             Delete Selected
           </Button>
@@ -215,7 +215,7 @@ export function ZoneCanvas({
         <Stage
           width={width}
           height={height}
-          className="overflow-hidden rounded-xl border border-white/10 bg-slate-900"
+          className="overflow-hidden rounded-xl border bg-muted/20"
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
           onMouseUp={handlePointerUp}
@@ -257,7 +257,7 @@ export function ZoneCanvas({
                     x={minX}
                     y={Math.max(0, minY - 20)}
                     text={zone.name}
-                    fill="#cbd5e1"
+                    fill="hsl(var(--foreground))"
                     fontSize={11}
                   />
 
@@ -268,8 +268,8 @@ export function ZoneCanvas({
                           x={point[0]}
                           y={point[1]}
                           radius={5}
-                          fill="#38bdf8"
-                          stroke="#082f49"
+                          fill="hsl(var(--primary))"
+                          stroke="hsl(var(--border))"
                           strokeWidth={1}
                           draggable
                           onDragEnd={(event) =>
@@ -291,7 +291,7 @@ export function ZoneCanvas({
               <>
                 <Line
                   points={flatDraftPoints}
-                  stroke="#22d3ee"
+                  stroke="hsl(var(--primary))"
                   strokeWidth={2}
                   lineCap="round"
                   lineJoin="round"
@@ -302,7 +302,11 @@ export function ZoneCanvas({
                     x={point[0]}
                     y={point[1]}
                     radius={index === 0 ? 7 : 5}
-                    fill={index === 0 ? '#06b6d4' : '#38bdf8'}
+                    fill={
+                      index === 0
+                        ? 'hsl(var(--foreground))'
+                        : 'hsl(var(--primary))'
+                    }
                   />
                 ))}
               </>
@@ -314,7 +318,7 @@ export function ZoneCanvas({
                 y={rectDraft.y}
                 width={rectDraft.width}
                 height={rectDraft.height}
-                stroke="#22d3ee"
+                stroke="hsl(var(--primary))"
                 dash={[8, 5]}
               />
             ) : null}

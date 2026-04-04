@@ -28,14 +28,14 @@ export function EventModal({ event, onClose }: EventModalProps) {
       {event ? (
         <DialogContent
           showCloseButton
-          className="grid max-w-5xl gap-4 border-white/10 bg-slate-900 p-4 sm:max-w-5xl md:grid-cols-[2fr_1fr]"
+          className="grid max-w-5xl gap-4 p-4 sm:max-w-5xl md:grid-cols-[2fr_1fr]"
         >
           <DialogTitle className="sr-only">Incident Detail</DialogTitle>
           <DialogDescription className="sr-only">
             Detailed playback and metadata for the selected incident.
           </DialogDescription>
 
-          <Card className="gap-0 overflow-hidden rounded-xl border border-white/10 bg-black py-0">
+          <Card className="gap-0 overflow-hidden rounded-xl py-0">
             <video
               controls
               autoPlay
@@ -45,9 +45,9 @@ export function EventModal({ event, onClose }: EventModalProps) {
             />
           </Card>
 
-          <Card className="rounded-xl border border-white/10 bg-slate-950/70">
+          <Card className="rounded-xl">
             <CardHeader className="px-4 pt-4 pb-2">
-              <CardTitle className="text-sm font-semibold text-slate-100">
+              <CardTitle className="text-sm font-semibold">
                 Incident Metadata
               </CardTitle>
             </CardHeader>
@@ -58,18 +58,19 @@ export function EventModal({ event, onClose }: EventModalProps) {
               >
                 Risk {(event.riskScore * 100).toFixed(0)}%
               </Badge>
-              <p className="text-xs text-slate-300">ID: {event.id}</p>
-              <p className="text-xs text-slate-300">Person: {event.personId}</p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs">ID: {event.id}</p>
+              <p className="text-xs">Person: {event.personId}</p>
+              <p className="text-xs text-muted-foreground">
                 {formatTimestamp(event.timestamp)}
               </p>
-              <p className="text-xs leading-relaxed text-slate-300">
+              <p className="text-xs leading-relaxed text-foreground">
                 {event.description}
               </p>
               <Button
                 type="button"
+                variant="default"
                 onClick={onClose}
-                className="mt-4 w-full bg-cyan-500 text-slate-950 hover:bg-cyan-400"
+                className="mt-4 w-full"
               >
                 Close
               </Button>

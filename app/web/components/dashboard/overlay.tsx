@@ -27,10 +27,10 @@ export function Overlay({ detections }: OverlayProps) {
                 height: detection.box.height,
                 borderColor:
                   detection.riskScore >= 0.75
-                    ? '#f43f5e'
+                    ? 'hsl(var(--destructive))'
                     : detection.riskScore >= 0.45
-                      ? '#f59e0b'
-                      : '#10b981',
+                      ? 'hsl(var(--accent-foreground))'
+                      : 'hsl(var(--primary))',
               }}
             >
               <div
@@ -47,7 +47,7 @@ export function Overlay({ detections }: OverlayProps) {
             >
               <polyline
                 fill="none"
-                stroke="rgba(56, 189, 248, 0.9)"
+                stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 points={detection.trajectory
                   .map((point) => `${point.x},${point.y}`)
