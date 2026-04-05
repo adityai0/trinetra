@@ -7,3 +7,4 @@ pillow
 twilio
 elevenlabs
 python-dotenv
+pymongo[srv]

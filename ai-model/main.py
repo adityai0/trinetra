@@ -10,9 +10,12 @@ from queue import Queue
 from twilio.rest import Client
 import os
 import uuid
+from io import BytesIO
 from dotenv import load_dotenv
-from elevenlabs import VoiceSettings, play
+from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
+
+from mongo_service import MongoLogService
 
 load_dotenv()
 account_sid = os.getenv("TWILIO_SID")
@@ -31,6 +34,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 gemini_model = genai.GenerativeModel('gemini-2.5-flash')
 SUPERPLANE_WEBHOOK_URL = "YOUR_SUPERPLANE_URL"
+mongo_service = MongoLogService()
+mongo_service.connect()
 
 # YOLO Pose model is better (XGBoost code wala idea)
 # 'yolo11n-pose.pt' use karne se body keypoints milte hain
@@ -44,37 +49,107 @@ class HackByteVision:
         self.analysis_queue = Queue(maxsize=1) # Background task queue
         self.call_made = False # Prevents spamming the Twilio API
         self.voice_alerted = False # Prevents spamming the ElevenLabs API
+        self.mongo_logged = False # Prevents duplicate MongoDB inserts per alert session
 
     def make_twilio_msg(self):
         """Runs in a separate thread to prevent video freezing."""
         try:
-            print("Initiating emergency Twilio call...")
-            message = client.messages.create(
-                messaging_service_sid='MG82b2484892a032b9623e6f8aa350120f',
-                body='Ahoy 👋',
-                to='+919234887044'
+            print("Initiating emergency Twilio SMS...")
+            messaging_service_sid = os.getenv(
+                "TWILIO_MESSAGING_SERVICE_SID",
+                "MG82b2484892a032b9623e6f8aa350120f",
             )
-            print(f"Call successful! SID: {message.sid}")
+            destination_number = os.getenv("TWILIO_ALERT_TO", "+919234887044")
+            message = client.messages.create(
+                messaging_service_sid=messaging_service_sid,
+                body='Alert: suspicious activity detected by Trinetra.',
+                to=destination_number,
+            )
+            print(f"Twilio SMS successful! SID: {message.sid}")
         except Exception as e:
             print(f"Twilio Error: {e}")
-            
-    def make_voice_alert(self):
-        """Runs in a separate thread to prevent video freezing."""
+    
+    def text_to_speech_stream(self, text):
+        # Perform the text-to-speech conversion
+        response = elevenlabs.text_to_speech.stream(
+            voice_id="K24eC7JpUgk8zMtQYrpV", # Adam pre-made voice
+            output_format="mp3_22050_32",
+            text=text,
+            model_id="eleven_multilingual_v2",
+            # Optional voice settings that allow you to customize the output
+            voice_settings=VoiceSettings(
+                stability=0.0,
+                similarity_boost=1.0,
+                style=0.0,
+                use_speaker_boost=True,
+                speed=1.0,
+            ),
+        )
+        # Create a BytesIO object to hold the audio data in memory
+        audio_stream = BytesIO()
+        # Write each chunk of audio data to the stream
+        for chunk in response:
+            if chunk:
+                audio_stream.write(chunk)
+        # Reset stream position to the beginning
+        audio_stream.seek(0)
+        # Return the stream for further use
+        return audio_stream
+
+    def make_voice_alert(self, current_pil_img):
         try:
             print("Generating ElevenLabs voice alert...")
             warning_prompt = "A theft was just detected. Write a strict, 1-sentence warning to the person over the intercom. Mention one piece of their clothing based on the image. Do not use hashtags or emojis."
-            warning_text = gemini_model.generate_content([warning_prompt, pil_img]).text
-    
-            # 2. Generate and play the ElevenLabs audio dynamically
-            audio_stream = elevenlabs.generate(
-                text=warning_text,
-                voice="K24eC7JpUgk8zMtQYrpV", # Or your cloned voice ID
-                model="eleven_flash_v2_5", # Flash model for instant generation
-                stream=True # This starts playing the audio before it even finishes generating!
-            )
-            play(audio_stream)
+            
+            warning_text = gemini_model.generate_content([warning_prompt, current_pil_img]).text
+            print(f"AI Warning Text: {warning_text}")
+
+            self.text_to_speech_stream(warning_text) # This will generate the TTS audio but not play it, as we can't do that in this environment
+            print("ElevenLabs voice alert generated successfully!")
+        
         except Exception as e:
             print(f"ElevenLabs Error: {e}")
+
+    def build_mongo_alert_message(self, analysis_text, person_count):
+        try:
+            prompt = f"""
+            Rewrite this CCTV theft alert into one concise operator log line.
+
+            Rules:
+            - Keep it under 160 characters.
+            - Mention the alert risk clearly.
+            - Mention the person count when useful.
+            - Do not add markdown, quotes, or bullet points.
+
+            Analysis:
+            {analysis_text}
+
+            People detected: {person_count}
+            """
+
+            response = gemini_model.generate_content(prompt)
+            custom_message = (response.text or '').strip()
+            return custom_message or analysis_text.strip()
+        except Exception as e:
+            print(f"Mongo log message generation error: {e}")
+            return analysis_text.strip()
+
+    def push_alert_log_to_db(self, analysis_text, person_count):
+        try:
+            custom_message = self.build_mongo_alert_message(analysis_text, person_count)
+            payload = {
+                "id": str(uuid.uuid4()),
+                "timestamp": mongo_service.build_timestamp(),
+                "text": custom_message,
+                "isAlert": True,
+                "riskLevel": "high",
+                "personCount": person_count,
+                "analysis": analysis_text,
+            }
+            if mongo_service.push_alert_log(payload):
+                print(f"MongoDB alert log saved: {payload['id']}")
+        except Exception as e:
+            print(f"MongoDB logging error: {e}")
 
     def ai_worker(self):
         """Ye function alag thread mein chalega taaki video freeze na ho"""
@@ -123,17 +198,37 @@ class HackByteVision:
                     
                     if "ALERT" in self.last_analysis_text.upper():
                         self.alert_status = True
-                        requests.post(SUPERPLANE_WEBHOOK_URL, json={"msg": self.last_analysis_text})
-                        # if not self.call_made:
-                        #     threading.Thread(target=self.make_twilio_call, daemon=True).start()
-                        #     self.call_made = True 
+                        if not self.call_made:
+                            threading.Thread(target=self.make_twilio_msg, daemon=True).start()
+                            self.call_made = True
+                        if not self.mongo_logged:
+                            threading.Thread(
+                                target=self.push_alert_log_to_db,
+                                args=(self.last_analysis_text, person_count),
+                                daemon=True,
+                            ).start()
+                            self.mongo_logged = True
+                        if SUPERPLANE_WEBHOOK_URL and SUPERPLANE_WEBHOOK_URL != "YOUR_SUPERPLANE_URL":
+                            try:
+                                requests.post(
+                                    SUPERPLANE_WEBHOOK_URL,
+                                    json={"msg": self.last_analysis_text},
+                                    timeout=5,
+                                )
+                            except Exception as webhook_error:
+                                print(f"Webhook Error: {webhook_error}")
                         if not self.voice_alerted:
-                            threading.Thread(target=self.make_voice_alert, daemon=True).start()
+                            threading.Thread(
+                                target=self.make_voice_alert,
+                                args=(pil_img,),
+                                daemon=True,
+                            ).start()
                             self.voice_alerted = True
                     else:
                         self.alert_status = False
                         self.call_made = False
                         self.voice_alerted = False 
+                        self.mongo_logged = False
                         
                 except Exception as e:
                     print(f"AI Error: {e}")
